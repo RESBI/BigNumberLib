@@ -24,4 +24,3 @@
 ### C = A - B
 ### E.G.:
 #### subValue(C, A, B);
-"# BigNumberLib" 
