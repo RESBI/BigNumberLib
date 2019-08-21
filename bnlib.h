@@ -1,8 +1,9 @@
-#include <bnlib.c>
 
-#define LENGTH 4096
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include "bnlib.h"
 
-unsigned __int128 MAX_128 = ~0;
+#define BNLENGTH 4096
 
 unsigned __int128 *newValue(unsigned __int128 x);
 void printValueHex(unsigned __int128 *A, int enterOrNot);
@@ -13,4 +14,5 @@ void getValueLength(unsigned __int128 *A);
 
 void addValue(unsigned __int128 *C, unsigned __int128 *A, unsigned __int128 *B);
 void subValue(unsigned __int128 *C, unsigned __int128 *A, unsigned __int128 *B);
- 
+
+#include "bnlib.c"
