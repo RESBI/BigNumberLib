@@ -109,7 +109,7 @@ void subValue(unsigned __int128 *C, unsigned __int128 *A, unsigned __int128 *B) 
 #pragma omp parallel for
 #endif
   for (unsigned __int128 i=1; i<=(A[0]>B[0]?B[0]:A[0]); i++) { // You could do parallel job with OMP here.
-    // A+B>MAX ==> A>MAX-B
+    // A-B<0 ==> A<B
     if (A[i] < B[i]) {
       if (i<BNLENGTH) {
 	Mark[i] = 1;
