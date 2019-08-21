@@ -1,24 +1,25 @@
 // Big number calculating lib.
-
 unsigned __int128 *newValue(unsigned __int128 x) {
   unsigned __int128 *value;
   value = (unsigned __int128 *)malloc(sizeof(unsigned __int128) * (BNLENGTH+1));
   value[0] = (x>0);
   value[1] = x;
   //printf("%d, %d\n", (value[0])&(0xFFFFFFFF), (x>0));
+  //#pragma omp parallel for
   for (unsigned __int128 i=2; i<=BNLENGTH; i++) {
     value[i] = 0;
   }
+  //#pragma omp barrier
   return (unsigned __int128 *)value;
 }
 
 void printValueHex(unsigned __int128 *A, int enterOrNot) {
   unsigned __int128 i=A[0];
   while (i) {
-    printf("%08x", (unsigned int)(A[i]>>96)&(0xFFFFFFFF));
-    printf("%08x", (unsigned int)(A[i]>>64)&(0xFFFFFFFF));
-    printf("%08x", (unsigned int)(A[i]>>32)&(0xFFFFFFFF));
-    printf("%08x", (unsigned int)(A[i])&(0xFFFFFFFF));
+    printf("%08x", (unsigned int)(A[i]>>96));
+    printf("%08x", (unsigned int)(A[i]>>64));
+    printf("%08x", (unsigned int)(A[i]>>32));
+    printf("%08x", (unsigned int)(A[i]));
     i--;
   }
   if (enterOrNot) {
@@ -26,12 +27,12 @@ void printValueHex(unsigned __int128 *A, int enterOrNot) {
   }
 }
 
-void getValueLength(unsigned __int128 *A) {
-  unsigned __int128 i=BNLENGTH;
-  while ((i)&&(!A[i])) {
-    i--;
+void getValueLength(unsigned __int128 *A, unsigned __int128 startAt) {
+  //unsigned __int128 i=BNLENGTH;
+  while ((startAt)&&(!A[startAt])) {
+    startAt--;
   }
-  A[0] = (unsigned __int128)i;
+  A[0] = (unsigned __int128)startAt;
 }
 
 void moveValue(unsigned __int128 *D, unsigned __int128 *S) {
@@ -75,7 +76,10 @@ void addValue(unsigned __int128 *C, unsigned __int128 *A, unsigned __int128 *B) 
   for (int i=0; i<(A[0]>B[0]?A[0]:B[0])+1; i++) {
     Mark[i] = 0;
   }
-  for (unsigned __int128 i=1; i<=(A[0]>B[0]?A[0]:B[0])+1; i++) { // You could do parrllel job with OMP here.
+#ifdef ParallelBigNumber
+#pragma omp parallel for
+#endif
+  for (unsigned __int128 i=1; i<=(A[0]>B[0]?B[0]:A[0]); i++) { // You could do parallel job with OMP here.
     // A+B>MAX ==> A>MAX-B
     if (!Leng)
     if (A[i] > (~B[i])) {
@@ -85,8 +89,11 @@ void addValue(unsigned __int128 *C, unsigned __int128 *A, unsigned __int128 *B) 
     }
     C[i] = A[i] + B[i]; 
   }
+#ifdef ParallelBigNumber
+#pragma omp barrier
+#endif
   lastProcess_Add(C, Mark, 1, (A[0]>B[0]?A[0]:B[0])+1);
-  getValueLength(C);
+  getValueLength(C, (A[0]>B[0]?A[0]:B[0])+1);
   //C[0] = (A[0]>B[0]?A[0]:B[0])+1;
   free(Mark);
 }
@@ -98,7 +105,10 @@ void subValue(unsigned __int128 *C, unsigned __int128 *A, unsigned __int128 *B) 
   for (int i=0; i<(A[0]>B[0]?A[0]:B[0])+1; i++) {
     Mark[i] = 0;
   }
-  for (unsigned __int128 i=1; i<=(A[0]>B[0]?A[0]:B[0])+1; i++) { // You could do parrllel job with OMP here.
+#ifdef ParallelBigNumber
+#pragma omp parallel for
+#endif
+  for (unsigned __int128 i=1; i<=(A[0]>B[0]?B[0]:A[0]); i++) { // You could do parallel job with OMP here.
     // A+B>MAX ==> A>MAX-B
     if (A[i] < B[i]) {
       if (i<BNLENGTH) {
@@ -107,8 +117,11 @@ void subValue(unsigned __int128 *C, unsigned __int128 *A, unsigned __int128 *B) 
     }
     C[i] = A[i] - B[i]; 
   }
+#ifdef ParallelBigNumber
+#pragma omp barrier
+#endif
   lastProcess_Sub(C, Mark, 1, (A[0]>B[0]?A[0]:B[0])+1);
-  getValueLength(C);
+  getValueLength(C, (A[0]>B[0]?A[0]:B[0])+1);
   //C[0] = (A[0]>B[0]?A[0]:B[0])+1;
   free(Mark);
 }
